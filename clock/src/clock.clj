@@ -1,14 +1,20 @@
 (ns clock)
 
-(defn clock->string [{:keys [h m]}]
-  (format "%02d:%02d" h m))
+(defn clock-parts [t]
+  {:h (mod (quot t 60) 24)
+   :m (mod t 60)})
+
+(defn clock->string [t]
+  (let [{:keys [h m]} (clock-parts t)]
+    (format "%02d:%02d" h m)))
 
 (defn clock [h m]
-  (let [minutes (if (< m 0) (- m 60) m)
-        extra-hours (quot minutes 60)
-        hours (+ h extra-hours)]
-    {:h (mod hours 24)
-     :m (mod minutes 60)}))
+  (let [m (if (< m 0) (- m 60) m)
+        h (+ h (quot m 60))
+        h (mod h 24)
+        m (mod m 60)]
+    (+ (* h 60) m)))
 
-(defn add-time [{:keys [h m]} minutes]
-  (clock h (+ m minutes)))
+(defn add-time [t add-m]
+  (let [{:keys [h m]} (clock-parts t)]
+    (clock h (+ m add-m))))
