@@ -19,33 +19,21 @@
         (into (map char upper))
         (into (map char lower)))))
 
-(defn- parse-run-sequence
-  "Transform something like `((\\1 \\2) (\\A) (\\B) (\\3) (\\C) (\\D) (\\4) (\\E))`
-   into `([12 \"A\"] [1 \"B\"] [3 \"C\"] [1 \"D\"] [4 \"E\"]])`
-   The tricky part here is that run-lengths of 1 (like (\\B) above) are not
-   prepended with any length. So here we default to length 1 and use that if
-   we parse up something within the alphabet without having parsed a length."
-  [run-sequence]
-  (loop [remaining run-sequence
-         current-length 1
-         result []]
-    (if (seq remaining)
-      (let [token (first remaining)
-            first-char (first token)
-            token-type (if (alphabet first-char) :alpha :num)
-            this-length (if (= token-type :num) (Integer/parseInt (apply str token)) current-length)]
-        (if (= token-type :alpha)
-          (recur (rest remaining) 1 (conj result [this-length (str first-char)]))
-          (recur (rest remaining) this-length result)))
-      result)))
-
 (defn run-length-decode
   "decodes a run-length-encoded string"
   [encoded-text]
-  (->> (partition-by alphabet encoded-text)
-       (parse-run-sequence)
-       (mapcat #(apply repeat %))
-       (apply str)))
+  (let [decode-char (fn [[head tail]]
+                      (if (alphabet (first head))
+                        [1 (str (first tail))]
+                        [(Integer/parseInt (apply str head)) (apply str tail)]))]
+    ;; "d" is for "dummy".
+    ;; Prepending it at the start for `(partition 2 1)` to chew on
+    (->> (partition-by alphabet (str "d" encoded-text))
+         (partition 2 1)
+         (filter #(alphabet (first (second %))))
+         (map decode-char)
+         (mapcat #(apply repeat %))
+         (apply str))))
 
 (comment
   (run-length-decode "12AB3CD4E")
@@ -53,6 +41,7 @@
   (partition-by alphabet "12AB3CD4E")
   ;; => ((\1 \2) (\A) (\B) (\3) (\C) (\D) (\4) (\E))
   (->> (partition-by alphabet "12AB3CD4E")
-       (parse-run-sequence))
-  ;; => [[12 "A"] [1 "B"] [3 "C"] [1 "D"] [4 "E"]]
+       (partition 2 1)
+       (filter #(alphabet (first (second %)))))
+  ;; => (((\1 \2) (\A)) ((\A) (\B)) ((\3) (\C)) ((\C) (\D)) ((\4) (\E)))
 )
