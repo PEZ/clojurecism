@@ -1,21 +1,22 @@
 (ns rna-transcription)
 
-(def dna-strand->rna-strand
-  {"G" "C"
-   "C" "G"
-   "T" "A"
-   "A" "U"})
-
 (defn to-rna [dna]
-  {:pre (boolean (re-find #"^[GCTA]+$" dna))}
-  (->> dna
-       (map (comp dna-strand->rna-strand str))
-       (apply str)))
+  (let [dna-strand->rna-strand 
+        (fn [strand]
+          (case strand
+            \G "C"
+            \C "G"
+            \T "A"
+            \A "U"
+            (throw (AssertionError. "Illegal DNA strand"))))]
+    (->> dna
+         (map dna-strand->rna-strand)
+         (apply str))))
 
 (comment
   (to-rna "GATACA")
   ;; => "CUAUGU"
   (to-rna "GAP")
-  ;; => Execution error (AssertionError) at rna-transcription/to-rna (rna_transcription.clj:9).
-  ;;    Assert failed: (re-find #"^[GCTA]+$" dna)
+  ;; => Execution error (AssertionError) at rna-transcription/to-rna$dna-strand->rna-strand (rna_transcription.clj:6).
+  ;;    Illegal DNA strand
 )
