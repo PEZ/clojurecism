@@ -1,21 +1,18 @@
 (ns matching-brackets)
 
-(def openings
+(def close->open
   {\) \(
    \] \[
    \} \{})
 
 (def brackets
-  (into #{} (apply concat openings)))
+  (into #{} (apply concat close->open)))
 
-(defn- scan [stack token]
-  (let [opening? (not (boolean (openings token)))]
-    (if opening?
-      (conj stack token)
-      (let [balanced? (= (first stack) (openings token))]
-        (cond balanced?      (rest stack)
-              (empty? stack) (reduced (conj stack token))
-              :else          (reduced (conj stack token)))))))
+(defn- scan [stack bracket]
+  (let [opener (close->open bracket)]
+    (cond (nil? opener)            (conj stack bracket)
+          (= (first stack) opener) (rest stack)
+          :else                    (reduced (conj stack bracket)))))
 
 (defn valid? [s]
   (->>
