@@ -1,45 +1,38 @@
 (ns matching-brackets)
 
 (def openings
-  {\( \)
-   \[ \]
-   \{ \}})
-
-(def closings
   {\) \(
    \] \[
    \} \{})
 
 (def brackets
-  (-> #{} 
-      (into (keys openings))
-      (into (keys closings))))
+  (into #{} (apply concat openings)))
 
-(def start-book
-  {\( 0
-   \[ 0
-   \{ 0})
-
-(defn- tick [book char]
-  (let [opening? (boolean (openings char))
-        bracket (if opening? char (closings char))
-        bracket-count ((if opening? inc dec) (book bracket))
-        new-book (assoc book bracket bracket-count)]
-    (if (neg? bracket-count)
-      (reduced new-book)
-      new-book)))
+(defn- process-token [stack token]
+  (let [opening? (not (boolean (openings token)))]
+    (if opening?
+      (conj stack token)
+      (if (empty? stack)
+        (reduced (conj stack token))
+        (let [residue (take-while (complement #{(openings token)}) stack)
+              residue (reduce process-token () residue)
+              before (-> (drop-while #{(openings token)} stack)
+                         (rest))]
+          (apply concat residue before))))))
 
 (defn valid? [s]
   (->>
    (filter brackets s)
-   (reduce tick start-book)
-   (vals)
-   (apply +)
-   (= 0)))
+   (reduce process-token ())
+   #_(empty?)))
 
 (comment
+  (valid? "[({})")
   (valid? "(defn valid? [s]
              (map identity s))")
+  (valid? "([(){[])")
+  (valid? "([()[])]")
+  (drop-while (complement #{\)}) '(\( \[ \] \( \) \)))
   (let [s "([(){[])"]
     (->> (filter brackets s)
-         (partition-by openings))))
+         )))
