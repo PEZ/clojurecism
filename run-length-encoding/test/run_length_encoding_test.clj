@@ -34,7 +34,7 @@
 
 (deftest decode-single-characters
   (testing "decode string with single characters only"
-    (is (= (rle/run-length-decode "XYZ") "XYZ"))))
+    (is (= "XYZ" (rle/run-length-decode "XYZ")))))
 
 (deftest decode-no-single-characters
   (testing "decode string with no single characters"
