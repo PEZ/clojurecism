@@ -3,12 +3,10 @@
 (defn run-length-encode
   "encodes a string with run-length-encoding"
   [plain-text]
-  (let [run-length (fn [coll]
-                     (as-> (count coll) $
-                       (if (> $ 1) (str $) "")))]
-    (->> (partition-by identity plain-text)
-         (map #(str (run-length %) (first %)))
-         (apply str))))
+  (->> (partition-by identity plain-text)
+       (mapcat (juxt count first))
+       (remove #{1})
+       (apply str)))
 
 (def alphabet
   (let [upper (range (int \A)
