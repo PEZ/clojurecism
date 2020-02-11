@@ -11,17 +11,18 @@
 (defn run-length-decode
   "decodes a run-length-encoded string"
   [encoded-text]
-  (let [length-str->length (fn [s]
-                             (-> (if (= "" s) "1" s) 
-                                 (Integer/parseInt)))]
+  (let [->run-length (fn [[_ length-str character]]
+                       [(Integer/parseInt (if (= "" length-str) "1" length-str)) character])]
     (->> (re-seq #"(?i)(\d*)([a-z\s])" encoded-text)
-         (map (juxt #(length-str->length (second %)) last))
+         (map ->run-length)
          (mapcat #(apply repeat %))
          (apply str))))
 
 (comment
+  (run-length-encode "AAAAAAAAAAAABCCCDEEEE")
+  ;; => "12AB3CD4E"
   (run-length-decode "12AB3CD4E")
   ;; => "AAAAAAAAAAAABCCCDEEEE"
-  (run-length-encode "AAAAAAAAAAAABCCCDEE§EE")
-  ;; => "12AB3CD2E§2E"
-)
+  (run-length-decode "2A,2b-D2E")
+  ;; => "AAbbDEE"
+  )
