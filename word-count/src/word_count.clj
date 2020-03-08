@@ -4,8 +4,7 @@
 (defn word-count [s]
   (->> (string/lower-case s)
        (re-seq #"\w+")
-       (group-by identity)
-       (reduce-kv (fn [m k v] (assoc m k (count v))) {})))
+       (frequencies)))
 
 (comment
   (word-count "Hello world! Beatiful world, hello.")
