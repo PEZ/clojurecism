@@ -50,21 +50,17 @@
                  (flatten $)
                  (apply * $))))
 
-(declare number)
-
-(defn- say-tail [sep tail]
-  (when-not (zero? tail) (str sep (number tail))))
-
 (defn number [n]
   (if (<= 0 n 999999999999)
     (if (and (< n 100) (primitives n))
       (primitives n)
       (let [chunk-div (chunk-divisor n)
             chunk-head (quot n chunk-div)
-            chunk-tail (- n (* chunk-head chunk-div))]
+            chunk-tail (- n (* chunk-head chunk-div))
+            say-tail (fn [sep] (when-not (zero? chunk-tail) (str sep (number chunk-tail))))]
         (if (= chunk-div 10) 
-          (str (number (* chunk-head 10)) (say-tail "-" chunk-tail))
-          (str (number chunk-head) " " (primitives chunk-div) (say-tail " " chunk-tail)))))
+          (str (number (* chunk-head 10)) (say-tail "-"))
+          (str (number chunk-head) " " (primitives chunk-div) (say-tail " ")))))
     (throw (.IllegalArgumentException "Number out of bounds"))))
 
 (comment
