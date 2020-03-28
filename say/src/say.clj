@@ -38,8 +38,6 @@
   "Calculate the largest power-of-10 group/chunk of `n`"
   [n]
   (cond
-    (zero? n)  0
-    (< n 10)   1
     (< n 100)  10
     (< n 1000) 100
     :else      (as-> n $
@@ -51,17 +49,17 @@
                  (apply * $))))
 
 (defn number [n]
-  (if (<= 0 n 999999999999)
-    (if (and (< n 100) (primitives n))
-      (primitives n)
-      (let [chunk-div (chunk-divisor n)
-            chunk-head (quot n chunk-div)
-            chunk-tail (- n (* chunk-head chunk-div))
-            say-tail (fn [sep] (when-not (zero? chunk-tail) (str sep (number chunk-tail))))]
-        (if (= chunk-div 10) 
-          (str (number (* chunk-head 10)) (say-tail "-"))
-          (str (number chunk-head) " " (primitives chunk-div) (say-tail " ")))))
-    (throw (.IllegalArgumentException "Number out of bounds"))))
+  (when-not (<= 0 n 999999999999)
+    (throw (.IllegalArgumentException "Number out of bounds")))
+  (if (and (< n 100) (primitives n))
+    (primitives n)
+    (let [chunk-div (chunk-divisor n)
+          chunk-head (quot n chunk-div)
+          chunk-tail (- n (* chunk-head chunk-div))
+          say-tail (fn [sep] (when-not (zero? chunk-tail) (str sep (number chunk-tail))))]
+      (if (= chunk-div 10)
+        (str (number (* chunk-head 10)) (say-tail "-"))
+        (str (number chunk-head) " " (primitives chunk-div) (say-tail " "))))))
 
 (comment
   (number 987654321123)
