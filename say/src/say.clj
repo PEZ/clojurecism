@@ -1,6 +1,6 @@
 (ns say)
 
-(def ^:private english
+(def ^:private primitives
   {0 "zero"
    1 "one"
    2 "two"
@@ -50,17 +50,20 @@
                  (flatten $)
                  (apply * $))))
 
+(defn- say-tail [tail sep f]
+  (when-not (zero? tail) (str sep (f tail))))
+
 (defn number [n]
-  (cond
-    (< n 0)            (throw (.IllegalArgumentException "Numbers below zero are not allowed"))
-    (> n 999999999999) (throw (.IllegalArgumentException "Numbers above the billions are not allowed"))
-    :else              (let [chunk-div (chunk-divisor n)
-                             chunk-head (quot n chunk-div)
-                             chunk-tail (- n (* chunk-head chunk-div))]
-                         (cond
-                           (< n 20)         (english n)
-                           (= 10 chunk-div) (str (english (* chunk-head 10)) "-" (english chunk-tail))
-                           :else            (str (number chunk-head) " " (english chunk-div) " " (number chunk-tail))))))
+  (if (<= 0 n 999999999999)
+    (if (and (< n 100) (primitives n))
+      (primitives n)
+      (let [chunk-div (chunk-divisor n)
+            chunk-head (quot n chunk-div)
+            chunk-tail (- n (* chunk-head chunk-div))]
+        (if (= chunk-div 10) 
+          (str (primitives (* chunk-head 10)) (say-tail chunk-tail "-" primitives))
+          (str (number chunk-head) " " (primitives chunk-div) (say-tail chunk-tail " " number)))))
+    (throw (.IllegalArgumentException "Number out of bounds"))))
 
 
 (comment
@@ -73,7 +76,8 @@
   (- 41 (* 10 40))
   (mod 41 10)
   (number 0)
-  (number 41)
+  (number 40)
+  (number 401)
   (number 400)
   (number 1100)
   (number 481)
