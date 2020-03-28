@@ -50,8 +50,10 @@
                  (flatten $)
                  (apply * $))))
 
-(defn- say-tail [tail sep f]
-  (when-not (zero? tail) (str sep (f tail))))
+(declare number)
+
+(defn- say-tail [sep tail]
+  (when-not (zero? tail) (str sep (number tail))))
 
 (defn number [n]
   (if (<= 0 n 999999999999)
@@ -61,28 +63,11 @@
             chunk-head (quot n chunk-div)
             chunk-tail (- n (* chunk-head chunk-div))]
         (if (= chunk-div 10) 
-          (str (primitives (* chunk-head 10)) (say-tail chunk-tail "-" primitives))
-          (str (number chunk-head) " " (primitives chunk-div) (say-tail chunk-tail " " number)))))
+          (str (number (* chunk-head 10)) (say-tail "-" chunk-tail))
+          (str (number chunk-head) " " (primitives chunk-div) (say-tail " " chunk-tail)))))
     (throw (.IllegalArgumentException "Number out of bounds"))))
 
-
 (comment
-  (chunk-divisor 401)
-  (chunk-divisor 987654321123)
-  (* (quot 987654321123 1000000000) 100000000000)
-  (- 987654321123 900000000000)
-  (chunk-divisor 41)
-  (* (quot 41 10) 10)
-  (- 41 (* 10 40))
-  (mod 41 10)
-  (number 0)
-  (number 40)
-  (number 401)
-  (number 400)
-  (number 1100)
-  (number 481)
-  (number 11141)
-  (number 111111)
   (number 987654321123)
   ;; => "nine hundred eighty-seven billion six hundred fifty-four million three hundred twenty-one thousand one hundred twenty-three"
   )
