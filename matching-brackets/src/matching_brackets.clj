@@ -9,14 +9,15 @@
   (into #{} (apply concat close->open)))
 
 (defn- scan [stack bracket]
+  #break
   (let [opener (close->open bracket)]
     (cond (nil? opener)            (conj stack bracket)
           (= (first stack) opener) (rest stack)
           :else                    (reduced (conj stack bracket)))))
 
 (defn valid? [s]
-  (->>
-   (filter brackets s)
+  (->> s
+   (filter brackets)
    (reduce scan ())
    (empty?)))
 
