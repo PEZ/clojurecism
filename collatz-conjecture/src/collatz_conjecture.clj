@@ -4,7 +4,7 @@
   {:pre [(pos-int? n)]}
   (let [step (fn [n]
                (if (even? n)
-                 (/ n 2)
+                 (quot n 2)
                  (inc (* n 3))))]
     (->> n
          (iterate step)
