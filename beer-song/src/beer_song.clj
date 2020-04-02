@@ -1,45 +1,33 @@
 (ns beer-song
-  (:require clojure.string))
-
-;; 99 bottles of beer on the wall, 99 bottles of beer.
-;; Take one down and pass it around, 98 bottles of beer on the wall.
+  (:require [clojure.pprint :refer [cl-format]]))
 
 (defn bottles
   [num]
-  (str (cond (> num 1)
-             (str num " bottles")
-             (= num 1)
-             "1 bottle"
-             (= num 0)
-             "No more bottles")
-       " of beer"))
+  (cl-format nil "~[no more bottles~;1 bottle~:;~:*~D bottles~] of beer" num))
 
 (defn fetch
   [num]
-  (if (= 0 num)
-    "Go to the store and buy some more"
-    (str "Take "
-         (if (> num 1)
-           "one"
-           "it")
-         " down and pass it around")))
+  (cl-format nil "~[go to the store and buy some more~:;~:*take ~[0~;it~:;one~] down and pass it around~]" num))
 
 (defn verse
-  "Returns the nth verse of the song."
+  "The `num` verse of the song."
   [num]
-  (str (bottles num)
-       " on the wall, " 
-       (clojure.string/lower-case (bottles num))
-       ".\n"
-       (fetch num)
-       ", "
-       (clojure.string/lower-case (bottles (if (= num 0) 99 (dec num) )))
-       " on the wall.\n"))
+  (cl-format nil
+             "~@(~a~)~:* on the wall, ~a.\n~@(~a~), ~a on the wall.\n"
+             (bottles num)
+             (fetch num)
+             (bottles (if (zero? num) 
+                        99 
+                        (dec num)))))
 
-(comment 
+(comment
   (verse 2)
+  ;; => "2 bottles of beer on the wall, 2 bottles of beer.\nTake one down and pass it around, 1 bottle of beer on the wall.\n"
   (verse 1)
-  (verse 0))
+  ;; => "1 bottle of beer on the wall, 1 bottle of beer.\nTake it down and pass it around, no more bottles of beer on the wall.\n"
+  (verse 0)
+  ;; => "No more bottles of beer on the wall, no more bottles of beer.\nGo to the store and buy some more, 99 bottles of beer on the wall.\n"
+  )
 
 (defn sing
   "Given a start and an optional end, returns all verses in this interval. If
@@ -51,6 +39,3 @@
         (map verse)
         (interpose "\n")
         (apply str))))
-
-(comment
-  (println (sing 3)))
