@@ -1,16 +1,20 @@
 (ns collatz-conjecture)
 
-(defn collatz [num]
-  (assert (pos-int? num))
-  (loop [i 0
-         n num]
-    (if (= n 1)
-      i
-      (recur (inc i) (if (even? n)
-                       (/ n 2)
-                       (+ (* n 3) 1))))))
+(defn- collatz-steps [num]
+  (reductions (fn [n i]
+                (cond
+                  (= n 1)   (reduced i)
+                  (even? n) (/ n 2)
+                  :else     (+ (* n 3) 1)))
+              num (range)))
 
 (comment
-  (collatz 12)
-  ;; => 9
+  (collatz-steps 12)
+  ;; => (12 6 3 10 5 16 8 4 2 1 9)
   )
+
+(defn collatz [num]
+  {:pre [(pos-int? num)]}
+  (->> num
+       collatz-steps
+       last))
