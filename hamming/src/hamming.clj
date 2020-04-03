@@ -5,8 +5,8 @@
   {:test (fn []
            (is (= 7 (distance "GAGCCTACTAACGGGAT" "CATCGTAATGACGGCCT")))
            (is (nil? (distance "GAT" "GATACA"))))}
-  [strand1 strand2]
-  (when (= (count strand1) (count strand2))
-    (->> (map #(= %1 %2) strand1 strand2)
+  [s1 s2]
+  (when (= (count s1) (count s2))
+    (->> (map = s1 s2)
          (filter false?)
          (count))))
