@@ -11,13 +11,13 @@
 (defn- scan [stack bracket]
   (let [opener (close->open bracket)]
     (cond (nil? opener)            (conj stack bracket)
-          (= (first stack) opener) (rest stack)
+          (= (peek stack) opener)  (pop stack)
           :else                    (reduced (conj stack bracket)))))
 
 (defn valid? [s]
   (->> s
    (filter brackets)
-   (reduce scan ())
+   (reduce scan [])
    (empty?)))
 
 (comment
